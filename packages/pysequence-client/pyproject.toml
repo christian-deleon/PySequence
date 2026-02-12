@@ -1,6 +1,6 @@
 [project]
 name = "pysequence-client"
-version = "0.2.3"
+version = "0.3.0"
 description = "Unofficial Python client for the GetSequence API server"
 authors = [
     {name = "Christian De Leon", email = "christian@deleon.me"}
