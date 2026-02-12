@@ -155,6 +155,15 @@ reauth:
 fmt:
     black .
 
+# Check formatting with Black (no changes)
+lint:
+    black --check .
+
+# Run lint + unit tests (full local CI check)
+check:
+    just lint
+    just test-unit
+
 # Get code statistics with cloc
 loc:
     cloc --fmt=1 --thousands-delimiter=, --vcs=git .
