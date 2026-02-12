@@ -4,7 +4,6 @@ import os
 from dataclasses import dataclass
 from pathlib import Path
 
-
 DATA_DIR = Path(os.environ.get("SEQUENCE_DATA_DIR", "."))
 
 
@@ -40,7 +39,7 @@ def get_sequence_config() -> SequenceConfig:
 
     Expected env vars: SEQUENCE_ORG_ID, SEQUENCE_KYC_ID, SEQUENCE_AUTH0_CLIENT_ID
     """
-    
+
     return SequenceConfig(
         organization_id=os.environ["SEQUENCE_ORG_ID"],
         kyc_id=os.environ["SEQUENCE_KYC_ID"],

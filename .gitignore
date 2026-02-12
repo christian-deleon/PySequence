@@ -263,4 +263,3 @@ tags
 .tokens.json
 .daily_limits.json
 .audit.jsonl
-!op.env

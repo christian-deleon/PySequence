@@ -18,7 +18,6 @@ from curl_cffi.requests import Session
 from playwright.sync_api import Page, sync_playwright
 from pysequence_sdk.config import DATA_DIR, get_credentials, get_sequence_config
 
-
 log = logging.getLogger(__name__)
 
 AUTH0_DOMAIN = "https://auth.getsequence.io"
@@ -42,11 +41,11 @@ def _load_tokens() -> AuthTokens | None:
     if not TOKEN_PATH.exists():
         log.debug("No token cache at %s", TOKEN_PATH)
         return None
-    
+
     try:
         data = json.loads(TOKEN_PATH.read_text())
         return AuthTokens(**data)
-    
+
     except (json.JSONDecodeError, KeyError, TypeError):
         log.warning("Corrupt token cache at %s, ignoring", TOKEN_PATH)
         return None
@@ -242,5 +241,5 @@ def get_access_token() -> str:
 
     # No tokens or refresh failed — full authentication
     tokens = authenticate()
-    
+
     return tokens.access_token

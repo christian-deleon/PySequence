@@ -2,7 +2,6 @@ from fastapi import APIRouter, Depends, Request
 from pysequence_api.dependencies import get_client
 from pysequence_sdk import SequenceClient
 
-
 router = APIRouter()
 
 

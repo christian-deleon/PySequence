@@ -16,6 +16,7 @@ package-mode = false
 pysequence-sdk = {path = "packages/pysequence-sdk", develop = true}
 pysequence-api = {path = "packages/pysequence-api", develop = true}
 pysequence-client = {path = "packages/pysequence-client", develop = true}
+pysequence-bot = {path = "packages/pysequence-bot", develop = true}
 
 [dependency-groups]
 dev = [
@@ -29,6 +30,7 @@ testpaths = [
     "packages/pysequence-sdk/tests",
     "packages/pysequence-api/tests",
     "packages/pysequence-client/tests",
+    "packages/pysequence-bot/tests",
 ]
 markers = ["integration: tests that hit the real Sequence API (deselected by default)"]
 addopts = "--import-mode=importlib -m 'not integration'"

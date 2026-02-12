@@ -1,5 +1,3 @@
-from pysequence_api.safeguards.audit import AuditLog
-from pysequence_api.safeguards.daily_limits import DailyLimitTracker
-
+from pysequence_sdk.safeguards import AuditLog, DailyLimitTracker
 
 __all__ = ["AuditLog", "DailyLimitTracker"]

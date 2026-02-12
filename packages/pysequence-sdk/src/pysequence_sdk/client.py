@@ -21,7 +21,6 @@ from pysequence_sdk.graphql.queries import (
     TRANSFER_REFERENCE_DETAIL,
 )
 
-
 GRAPHQL_ENDPOINT = "https://app.getsequence.io/api/graphql"
 ORIGIN = "https://app.getsequence.io"
 _ET = ZoneInfo("America/New_York")
@@ -32,13 +31,13 @@ def _to_eastern(utc_iso: str | None) -> str | None:
 
     if not utc_iso:
         return utc_iso
-    
+
     try:
         dt = datetime.fromisoformat(utc_iso.replace("Z", "+00:00"))
         if dt.tzinfo is None:
             return utc_iso  # date-only string, no conversion needed
         return dt.astimezone(_ET).isoformat()
-    
+
     except (ValueError, TypeError):
         return utc_iso
 
@@ -102,7 +101,7 @@ class SequenceClient:
 
         if self._last_request_time == 0:
             return
-        
+
         elapsed = time.monotonic() - self._last_request_time
         minimum = self._MIN_DELAY + random.uniform(0, self._MAX_JITTER)
         remaining = minimum - elapsed
@@ -139,12 +138,12 @@ class SequenceClient:
 
         if resp.status_code >= 400:
             raise RuntimeError(f"HTTP {resp.status_code}: {resp.text[:500]}")
-        
+
         data = resp.json()
 
         if "errors" in data:
             raise RuntimeError(f"GraphQL errors: {data['errors']}")
-        
+
         return data["data"]
 
     # -- high-level helpers ------------------------------------------------
@@ -269,10 +268,10 @@ class SequenceClient:
         )
 
         result = data["forKYC"]["createPayment"]
-        
+
         if result.get("error"):
             raise RuntimeError(f"Transfer failed: {result['error']['message']}")
-        
+
         return result["ok"]
 
     def get_activity_summary(self) -> dict[str, Any]:
@@ -504,7 +503,7 @@ class SequenceClient:
             for account in org.get("accounts", []):
                 meta = account.get("metadata", {})
                 balance = meta.get("balance", {}) if meta else {}
-                
+
                 accounts.append(
                     {
                         "id": account["id"],

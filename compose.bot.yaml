@@ -1,10 +1,11 @@
-name: pysequence-dev
+name: pysequence-bot
 
 services:
 
-  dev:
+  telegram-bot:
     build:
-      target: dev
+      target: bot
+    restart: unless-stopped
     environment:
       - SEQUENCE_EMAIL
       - SEQUENCE_PASSWORD
@@ -12,15 +13,14 @@ services:
       - SEQUENCE_ORG_ID
       - SEQUENCE_KYC_ID
       - SEQUENCE_AUTH0_CLIENT_ID
-      - SEQUENCE_API_KEY
-      - SEQUENCE_DATA_DIR=/app/data
       - TELEGRAM_BOT_TOKEN
       - TELEGRAM_USER_NAMES
       - TELEGRAM_GROUP_ID
       - ANTHROPIC_API_KEY
       - BOT_DATA_DIR=/app/data
+      - SEQUENCE_DATA_DIR=/app/data
     volumes:
-      - data:/app/data
+      - bot-data:/app/data
 
 volumes:
-  data:
+  bot-data:

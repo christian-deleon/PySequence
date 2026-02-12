@@ -3,7 +3,6 @@ from pysequence_api.dependencies import get_client
 from pysequence_api.models import TransferRequest
 from pysequence_sdk import SequenceClient
 
-
 router = APIRouter()
 
 
@@ -83,12 +82,12 @@ def create_transfer(
 
         if "Transfer failed:" in error_msg:
             raise HTTPException(status_code=400, detail=error_msg)
-        
+
         raise
 
     transfer_id = result.get("id", "unknown")
     daily_limits.record(body.amount_cents, transfer_id)
-    
+
     audit.log(
         "transfer_completed",
         transfer_id=transfer_id,

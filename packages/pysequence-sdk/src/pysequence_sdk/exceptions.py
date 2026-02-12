@@ -1,4 +1,3 @@
-
 class SequenceError(Exception):
     """Base exception for SDK errors."""
 

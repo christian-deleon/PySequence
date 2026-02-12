@@ -6,7 +6,6 @@ from typing import Any
 import httpx
 from pysequence_client.exceptions import ApiError
 
-
 log = logging.getLogger(__name__)
 
 
@@ -32,7 +31,7 @@ class SequenceApiClient:
                 detail = resp.text
 
             raise ApiError(resp.status_code, detail)
-        
+
         return resp.json()
 
     # -- Pod operations --
@@ -46,11 +45,11 @@ class SequenceApiClient:
     def get_pod_balance(self, pod_name: str) -> dict[str, Any] | None:
         try:
             return self._request("GET", f"/api/pods/{pod_name}/balance")
-        
+
         except ApiError as e:
             if e.status_code == 404:
                 return None
-            
+
             raise
 
     def get_pod_detail(self, pod_id: str) -> dict[str, Any]:
@@ -83,7 +82,7 @@ class SequenceApiClient:
 
         if activity_types:
             params["activity_types"] = ",".join(activity_types)
-            
+
         return self._request("GET", "/api/activity", params=params)
 
     def get_transfer_detail(self, transfer_id: str) -> dict[str, Any]:

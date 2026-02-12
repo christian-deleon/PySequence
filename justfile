@@ -1,32 +1,32 @@
 set quiet := true
 
 op_account := "my.1password.com"
-dc := "docker compose"
+dc_api := "docker compose -f compose.api.yaml"
+dc_bot := "docker compose -f compose.bot.yaml"
 dc_dev := "docker compose -f compose.dev.yaml"
 
-# List all available commands
 [private]
 default:
     just --list --unsorted
 
 # ─── Helpers ──────────────────────────────────────────────────────────────────
 
-# Run an op CLI command with the project account
 [private]
 op *args:
     op --account {{ op_account }} {{ args }}
 
-# Run a command with 1Password secrets injected
 [private]
 oprun *args:
     just op run --env-file op.env -- {{ args }}
 
-# Run docker compose with 1Password secrets injected
 [private]
-opdc *args:
-    just oprun {{ dc }} {{ args }}
+opdc-api *args:
+    just oprun {{ dc_api }} {{ args }}
 
-# Run docker compose (dev) with 1Password secrets injected
+[private]
+opdc-bot *args:
+    just oprun {{ dc_bot }} {{ args }}
+
 [private]
 opdc-dev *args:
     just oprun {{ dc_dev }} {{ args }}
@@ -48,25 +48,55 @@ test-integration op="false" *args:
 test-all op="false" *args:
     {{ if op == "true" { "just opdc-dev" } else { dc_dev } }} run --build --rm dev pytest --override-ini "addopts=--import-mode=importlib" {{ args }}
 
-# ─── Services ────────────────────────────────────────────────────────────────
+# ─── API Server ───────────────────────────────────────────────────────────────
 
 # Start the API server (--op for 1Password secrets)
 [arg("op", long="op", value="true")]
-up op="false" *args:
-    {{ if op == "true" { "just opdc" } else { dc } }} up --build -d {{ args }}
+api-up op="false" *args:
+    {{ if op == "true" { "just opdc-api" } else { dc_api } }} up --build -d {{ args }}
 
 # Stop the API server
-down *args:
-    {{ dc }} down {{ args }}
-
-# Build Docker images
-build:
-    {{ dc }} build
-    {{ dc_dev }} build
+api-down *args:
+    {{ dc_api }} down {{ args }}
 
 # Follow API server logs
-logs:
-    {{ dc }} logs -f
+api-logs:
+    {{ dc_api }} logs -f
+
+# ─── Telegram Bot ─────────────────────────────────────────────────────────────
+
+# Start the Telegram bot (--op for 1Password secrets)
+[arg("op", long="op", value="true")]
+bot-up op="false" *args:
+    {{ if op == "true" { "just opdc-bot" } else { dc_bot } }} up --build -d {{ args }}
+
+# Stop the Telegram bot
+bot-down *args:
+    {{ dc_bot }} down {{ args }}
+
+# Follow Telegram bot logs
+bot-logs:
+    {{ dc_bot }} logs -f
+
+# ─── Build ────────────────────────────────────────────────────────────────────
+
+# Build all Docker images
+build:
+    {{ dc_api }} build
+    {{ dc_bot }} build
+    {{ dc_dev }} build
+
+# Build the API server Docker image
+api-build:
+    {{ dc_api }} build
+
+# Build the Telegram bot Docker image
+bot-build:
+    {{ dc_bot }} build
+
+# Build the dev/test Docker image
+dev-build:
+    {{ dc_dev }} build
 
 # ─── Maintenance ──────────────────────────────────────────────────────────────
 

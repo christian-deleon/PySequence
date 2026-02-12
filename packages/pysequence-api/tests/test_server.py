@@ -9,7 +9,6 @@ from fastapi.testclient import TestClient
 from pysequence_api.routes import health_router, router
 from pysequence_api.safeguards import AuditLog, DailyLimitTracker
 
-
 API_KEY = "test-api-key"
 
 
@@ -49,7 +48,7 @@ def _build_app(
 
     app.include_router(health_router)
     app.include_router(router)
-    
+
     return app
 
 

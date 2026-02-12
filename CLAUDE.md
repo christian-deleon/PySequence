@@ -1,6 +1,16 @@
 # PySequence
 
-Unofficial Python SDK and REST API server for the [GetSequence](https://getsequence.io/) personal finance platform.
+Unofficial Python SDK for the [GetSequence](https://getsequence.io/) personal finance platform.
+
+## Philosophy
+
+This project is a **toolkit, not a monolith**. Users pick what they need:
+
+- **SDK only** — Import `pysequence-sdk` into your own Python project and talk to the Sequence GraphQL API directly. No server, no bot, no Docker.
+- **API server** — A REST trust boundary for external services you don't control (e.g. OpenClaw). Sits in front of the SDK with API-key auth and transfer safeguards.
+- **Telegram bot** — Uses the SDK directly (not the API). Trusted because it has its own safeguards (daily limits, audit trail, transfer confirmation) and a deliberately limited toolset (no shell access). Deploy standalone with Docker Compose.
+
+Each component is independently deployable. The API and bot have separate Docker Compose files — a bot-only deployer never sees API config, and vice versa.
 
 ## Monorepo Structure
 
@@ -9,11 +19,14 @@ packages/
   pysequence-sdk/        # GraphQL SDK (curl_cffi + Playwright)
   pysequence-api/        # FastAPI REST server (depends on SDK)
   pysequence-client/     # HTTP client for the REST server (standalone)
+  pysequence-bot/        # Optional Telegram bot (depends on SDK)
 ```
 
 **Dependency graph:**
 ```
 pysequence-client → (HTTP) → pysequence-api → pysequence-sdk → (GraphQL) → Sequence.io
+                                                    ↑
+                              pysequence-bot ────────┘
 ```
 
 ## Packages
@@ -29,6 +42,7 @@ Core SDK that communicates with the Sequence GraphQL API.
 - `exceptions.py` — SDK error types
 - `graphql/queries.py` — GraphQL query strings
 - `graphql/mutations.py` — GraphQL mutation strings
+- `safeguards/` — Shared `AuditLog` + `DailyLimitTracker` (used by both API and bot)
 
 ### pysequence-api
 FastAPI REST server wrapping the SDK with financial safeguards.
@@ -38,7 +52,7 @@ FastAPI REST server wrapping the SDK with financial safeguards.
 - `dependencies.py` — API key auth, shared client
 - `models.py` — Pydantic request models
 - `routes/` — Route modules (health, pods, accounts, activity, transfers)
-- `safeguards/` — Audit trail + daily transfer limits
+- `safeguards/` — Re-exports from `pysequence_sdk.safeguards`
 
 ### pysequence-client
 Standalone HTTP client for consuming the REST API. No SDK dependency.
@@ -46,6 +60,15 @@ Standalone HTTP client for consuming the REST API. No SDK dependency.
 - `client.py` — `SequenceApiClient`
 - `models.py` — Response models
 - `exceptions.py` — `ApiError`
+
+### pysequence-bot
+Optional Telegram bot that uses the SDK directly with a Claude AI agent.
+
+- `config.py` — `SdkConfig`, `AgentConfig`, `TelegramConfig`, env var loading
+- `ai/agent.py` — Claude-powered agent with tool-use loop
+- `ai/tools.py` — Tool definitions and execution against the SDK
+- `ai/memory.py` — Persistent JSON-backed memory store
+- `telegram/bot.py` — Telegram bot handlers, rate limiting, transfer confirmation
 
 ## SDK Usage
 
@@ -122,6 +145,11 @@ The SDK uses `curl_cffi` with Chrome configuration for browser-compatible HTTP r
 | `SEQUENCE_SERVER_PORT` | No | `8720` | Server bind port |
 | `SEQUENCE_MAX_TRANSFER_CENTS` | No | `1000000` | Per-transfer limit ($10,000) |
 | `SEQUENCE_MAX_DAILY_TRANSFER_CENTS` | No | `2500000` | Daily transfer limit ($25,000) |
+| `TELEGRAM_BOT_TOKEN` | Bot | — | Telegram bot token |
+| `TELEGRAM_USER_NAMES` | Bot | — | Comma-separated `id:name` pairs (e.g. `12345:Alice,67890:Bob`) |
+| `TELEGRAM_GROUP_ID` | Bot | — | Allowed Telegram group ID |
+| `ANTHROPIC_API_KEY` | Bot | — | Anthropic API key for Claude |
+| `BOT_DATA_DIR` | No | `.` | Directory for bot data files (memories, limits) |
 
 ## API Details
 
@@ -147,9 +175,13 @@ Use `@justfile` recipes for common operations. Run `just` to see available recip
 just test-unit            # Run unit tests in Docker
 just test-integration     # Run integration tests in Docker
 just test-all             # Run all tests (unit + integration) in Docker
-just up                   # Start the API server
-just down                 # Stop the API server
-just build                # Build Docker images
+just api-up               # Start the API server
+just api-down             # Stop the API server
+just api-logs             # Follow API server logs
+just bot-up               # Start the Telegram bot
+just bot-down             # Stop the Telegram bot
+just bot-logs             # Follow Telegram bot logs
+just build                # Build all Docker images
 just install              # Install dependencies (for IDE support)
 just reauth               # Delete cached tokens to force re-authentication
 just fmt                  # Format code with Black
@@ -159,14 +191,20 @@ All tests and the API server run in Docker. Add `--op` to any recipe to inject s
 
 ```bash
 just test-unit --op       # Unit tests with 1Password secrets
-just up --op              # Start API server with 1Password secrets
+just api-up --op          # Start API server with 1Password secrets
+just bot-up --op          # Start Telegram bot with 1Password secrets
 ```
 
 ## Docker
 
-All Docker files live at the project root: `Dockerfile`, `compose.yaml`, `compose.dev.yaml`.
+All Docker files live at the project root:
 
-Multi-stage build: `prod` (server entrypoint) and `dev` (includes tests).
+- `Dockerfile` — Multi-stage build: `prod` (API server), `bot` (Telegram bot), `dev` (testing)
+- `compose.api.yaml` — API server deployment
+- `compose.bot.yaml` — Telegram bot deployment
+- `compose.dev.yaml` — Dev/test environment
+
+The API and bot have separate compose files so each can be deployed independently.
 
 ## Requirements & Constraints
 
@@ -176,4 +214,4 @@ Multi-stage build: `prod` (server entrypoint) and `dev` (includes tests).
 - **GraphQL queries must exactly match the webapp:** Query strings, fragment names, field selections, and `__typename` inclusions must match.
 - **Use Justfile recipes:** Use `@justfile` recipes instead of raw `poetry run` commands when a recipe exists.
 - **Single SequenceClient per server:** All requests share one instance so rate limiting works correctly.
-- **Safeguards at server level only:** The SDK remains a thin GraphQL wrapper. The API server enforces limits.
+- **Shared safeguards:** `AuditLog` and `DailyLimitTracker` live in `pysequence_sdk.safeguards` and are shared by both the API server and the bot.

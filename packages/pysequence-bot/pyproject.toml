@@ -1,0 +1,19 @@
+[project]
+name = "pysequence-bot"
+version = "0.1.0"
+description = "Optional Telegram bot for the PySequence SDK"
+requires-python = ">=3.11"
+dependencies = [
+    "anthropic (>=0.79.0,<1.0.0)",
+    "python-telegram-bot (>=22.6,<23.0)",
+]
+
+[tool.poetry]
+packages = [{include = "pysequence_bot", from = "src"}]
+
+[tool.poetry.dependencies]
+pysequence-sdk = {path = "../pysequence-sdk", develop = true}
+
+[build-system]
+requires = ["poetry-core>=2.0.0,<3.0.0"]
+build-backend = "poetry.core.masonry.api"

@@ -21,7 +21,7 @@ def pod_balance(pod_name: str, client: SequenceClient = Depends(get_client)) -> 
 
     if result is None:
         raise HTTPException(status_code=404, detail=f"Pod '{pod_name}' not found")
-    
+
     return result
 
 

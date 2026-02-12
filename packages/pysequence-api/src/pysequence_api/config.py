@@ -21,7 +21,7 @@ def get_server_config() -> ServerConfig:
     SEQUENCE_SERVER_HOST, SEQUENCE_SERVER_PORT,
     SEQUENCE_MAX_TRANSFER_CENTS, SEQUENCE_MAX_DAILY_TRANSFER_CENTS (optional)
     """
-    
+
     return ServerConfig(
         api_key=os.environ["SEQUENCE_API_KEY"],
         org_id=os.environ.get("SEQUENCE_ORG_ID", ""),

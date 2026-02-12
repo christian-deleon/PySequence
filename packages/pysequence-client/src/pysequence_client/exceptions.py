@@ -1,4 +1,3 @@
-
 class ApiError(Exception):
     """HTTP error from the GetSequence API server."""
 
