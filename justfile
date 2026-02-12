@@ -98,6 +98,40 @@ bot-build:
 dev-build:
     {{ dc_dev }} build
 
+# ─── Release ─────────────────────────────────────────────────────────────────
+
+# Tag a release and push (e.g. just release 0.1.3)
+release version:
+    #!/usr/bin/env bash
+    set -euo pipefail
+    tag="v{{ version }}"
+    # Ensure working tree is clean
+    if [ -n "$(git status --porcelain)" ]; then
+        echo "error: working tree is dirty — commit or stash changes first" >&2
+        exit 1
+    fi
+    # Ensure we're on main
+    branch="$(git branch --show-current)"
+    if [ "$branch" != "main" ]; then
+        echo "error: releases must be tagged from main (currently on $branch)" >&2
+        exit 1
+    fi
+    # Ensure local main is up to date with remote
+    git fetch origin main
+    if [ "$(git rev-parse HEAD)" != "$(git rev-parse origin/main)" ]; then
+        echo "error: local main is not up to date with origin/main — pull or push first" >&2
+        exit 1
+    fi
+    # Ensure tag doesn't already exist
+    if git rev-parse "$tag" >/dev/null 2>&1; then
+        echo "error: tag $tag already exists" >&2
+        exit 1
+    fi
+    echo "Tagging $tag at $(git rev-parse --short HEAD)"
+    git tag "$tag"
+    git push origin "$tag"
+    echo "Pushed $tag — CI will publish packages and Docker image"
+
 # ─── Maintenance ──────────────────────────────────────────────────────────────
 
 # Install dependencies (for IDE support)
