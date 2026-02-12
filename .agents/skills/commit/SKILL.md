@@ -1,7 +1,6 @@
 ---
 name: commit
-description: Stage and commit changes following project conventions.
-  Use after all quality checks pass.
+description: Stage and commit changes following project conventions. Use after all quality checks pass.
 ---
 
 # Commit

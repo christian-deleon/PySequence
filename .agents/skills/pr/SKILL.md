@@ -1,7 +1,6 @@
 ---
 name: pr
-description: Create a branch and open a pull request via GitHub CLI.
-  Use after changes are committed.
+description: Create a branch and open a pull request via GitHub CLI. Use after changes are committed.
 ---
 
 # Pull Request

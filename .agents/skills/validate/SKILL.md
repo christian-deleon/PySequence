@@ -1,7 +1,6 @@
 ---
 name: validate
-description: Run all project quality checks and report results.
-  Use before committing or opening a PR.
+description: Run all project quality checks and report results. Use before committing or opening a PR.
 ---
 
 # Validate
