@@ -100,7 +100,7 @@ dev-build:
 
 # ─── Release ─────────────────────────────────────────────────────────────────
 
-# Tag a release and push (e.g. just release 0.1.3)
+# Tag a release and push (e.g. just release 0.2.1)
 release version:
     #!/usr/bin/env bash
     set -euo pipefail
@@ -127,9 +127,17 @@ release version:
         echo "error: tag $tag already exists" >&2
         exit 1
     fi
+    # Bump version in all packages
+    poetry version "{{ version }}"
+    for pkg in packages/pysequence-sdk packages/pysequence-api packages/pysequence-client packages/pysequence-bot; do
+        poetry -C "$pkg" version "{{ version }}"
+    done
+    # Commit version bump, tag, and push
+    git add pyproject.toml packages/*/pyproject.toml
+    git commit -m "chore: bump version to {{ version }}"
     echo "Tagging $tag at $(git rev-parse --short HEAD)"
     git tag "$tag"
-    git push origin "$tag"
+    git push origin main "$tag"
     echo "Pushed $tag — CI will publish packages and Docker image"
 
 # ─── Maintenance ──────────────────────────────────────────────────────────────
