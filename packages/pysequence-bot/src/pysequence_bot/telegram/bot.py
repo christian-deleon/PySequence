@@ -29,7 +29,7 @@ from pysequence_bot.config import (
     SdkConfig,
     TelegramConfig,
     get_sdk_config,
-    get_telegram_config,
+    load_config,
 )
 
 
@@ -339,10 +339,8 @@ def run_bot() -> None:
         format="%(asctime)s [%(name)s] %(levelname)s: %(message)s",
     )
 
-    telegram_config = get_telegram_config()
+    agent_config, telegram_config = load_config()
     sdk_config = get_sdk_config()
-
-    agent_config = AgentConfig()
     memory = MemoryStore(max_facts=agent_config.max_memory_facts)
     daily_limits = DailyLimitTracker(
         max_daily_cents=agent_config.max_daily_transfer_cents

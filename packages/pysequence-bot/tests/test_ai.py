@@ -9,7 +9,7 @@ from zoneinfo import ZoneInfo
 
 import pytest
 
-from pysequence_bot.ai.agent import Agent, SYSTEM_PROMPT, _build_system_prompt
+from pysequence_bot.ai.agent import Agent, _build_system_prompt
 from pysequence_bot.ai.memory import MemoryStore
 from pysequence_bot.ai.tools import (
     TOOLS,
@@ -69,9 +69,12 @@ def sdk_config() -> SdkConfig:
     return SdkConfig(org_id="org-1", kyc_id="kyc-1")
 
 
+TEST_SYSTEM_PROMPT = "You are a test finance assistant."
+
+
 @pytest.fixture
 def agent_config() -> AgentConfig:
-    return AgentConfig()
+    return AgentConfig(model="claude-opus-4-6", system_prompt=TEST_SYSTEM_PROMPT)
 
 
 @pytest.fixture
@@ -595,7 +598,7 @@ def _make_tool_use_block(tool_id, name, tool_input):
 
 class TestAgent:
     def test_simple_text_response(self, mock_client):
-        agent = Agent(mock_client)
+        agent = Agent(mock_client, agent_config=AgentConfig(model="claude-opus-4-6", system_prompt=TEST_SYSTEM_PROMPT))
 
         mock_response = MagicMock()
         mock_response.content = [_make_text_block("Hello!")]
@@ -611,7 +614,7 @@ class TestAgent:
         mock_create.assert_called_once()
 
     def test_tool_use_loop(self, mock_client):
-        agent = Agent(mock_client)
+        agent = Agent(mock_client, agent_config=AgentConfig(model="claude-opus-4-6", system_prompt=TEST_SYSTEM_PROMPT))
 
         # First response: tool use
         tool_response = MagicMock()
@@ -635,7 +638,7 @@ class TestAgent:
         assert len(agent._messages) == 4
 
     def test_conversation_history_grows(self, mock_client):
-        agent = Agent(mock_client)
+        agent = Agent(mock_client, agent_config=AgentConfig(model="claude-opus-4-6", system_prompt=TEST_SYSTEM_PROMPT))
 
         mock_response = MagicMock()
         mock_response.content = [_make_text_block("Response")]
@@ -651,7 +654,7 @@ class TestAgent:
         assert len(agent._messages) == 4
 
     def test_temperature_is_zero(self, mock_client):
-        agent = Agent(mock_client)
+        agent = Agent(mock_client, agent_config=AgentConfig(model="claude-opus-4-6", system_prompt=TEST_SYSTEM_PROMPT))
 
         mock_response = MagicMock()
         mock_response.content = [_make_text_block("ok")]
@@ -664,11 +667,11 @@ class TestAgent:
 
         call_kwargs = mock_create.call_args.kwargs
         assert call_kwargs["temperature"] == 0
-        assert call_kwargs["model"] == AgentConfig().model
-        assert call_kwargs["system"].startswith(SYSTEM_PROMPT)
+        assert call_kwargs["model"] == "claude-opus-4-6"
+        assert call_kwargs["system"].startswith(TEST_SYSTEM_PROMPT)
 
     def test_system_prompt_includes_user_name(self, mock_client):
-        agent = Agent(mock_client)
+        agent = Agent(mock_client, agent_config=AgentConfig(model="claude-opus-4-6", system_prompt=TEST_SYSTEM_PROMPT))
 
         mock_response = MagicMock()
         mock_response.content = [_make_text_block("ok")]
@@ -681,10 +684,10 @@ class TestAgent:
 
         call_kwargs = mock_create.call_args.kwargs
         assert "The current user is Alice." in call_kwargs["system"]
-        assert call_kwargs["system"].startswith(SYSTEM_PROMPT)
+        assert call_kwargs["system"].startswith(TEST_SYSTEM_PROMPT)
 
     def test_system_prompt_without_user_name(self, mock_client):
-        agent = Agent(mock_client)
+        agent = Agent(mock_client, agent_config=AgentConfig(model="claude-opus-4-6", system_prompt=TEST_SYSTEM_PROMPT))
 
         mock_response = MagicMock()
         mock_response.content = [_make_text_block("ok")]
@@ -696,7 +699,7 @@ class TestAgent:
             agent.process_message("test")
 
         call_kwargs = mock_create.call_args.kwargs
-        assert call_kwargs["system"].startswith(SYSTEM_PROMPT)
+        assert call_kwargs["system"].startswith(TEST_SYSTEM_PROMPT)
 
 
 # -- System prompt builder tests ---------------------------------------------
@@ -709,34 +712,34 @@ class TestBuildSystemPrompt:
         assert "ET" in result
 
     def test_without_user_name(self):
-        result = _build_system_prompt(None)
-        assert result.startswith(SYSTEM_PROMPT)
+        result = _build_system_prompt(TEST_SYSTEM_PROMPT, None)
+        assert result.startswith(TEST_SYSTEM_PROMPT)
         self._assert_has_eastern_datetime(result)
         assert "The current user is" not in result
 
     def test_with_empty_string(self):
-        result = _build_system_prompt("")
-        assert result.startswith(SYSTEM_PROMPT)
+        result = _build_system_prompt(TEST_SYSTEM_PROMPT, "")
+        assert result.startswith(TEST_SYSTEM_PROMPT)
         self._assert_has_eastern_datetime(result)
         assert "The current user is" not in result
 
     def test_with_user_name(self):
-        result = _build_system_prompt("Alice")
-        assert result.startswith(SYSTEM_PROMPT)
+        result = _build_system_prompt(TEST_SYSTEM_PROMPT, "Alice")
+        assert result.startswith(TEST_SYSTEM_PROMPT)
         self._assert_has_eastern_datetime(result)
         assert result.endswith("\n\nThe current user is Alice.")
 
     def test_with_memory_context(self):
         memory_ctx = "Things you remember:\n- [id-1] Savings is called The Vault (saved by Alice)"
-        result = _build_system_prompt(None, memory_context=memory_ctx)
-        assert result.startswith(SYSTEM_PROMPT)
+        result = _build_system_prompt(TEST_SYSTEM_PROMPT, None, memory_context=memory_ctx)
+        assert result.startswith(TEST_SYSTEM_PROMPT)
         self._assert_has_eastern_datetime(result)
         assert memory_ctx in result
 
     def test_with_memory_and_user_name(self):
         memory_ctx = "Things you remember:\n- [id-1] some fact (saved by Alice)"
-        result = _build_system_prompt("Alice", memory_context=memory_ctx)
-        assert result.startswith(SYSTEM_PROMPT)
+        result = _build_system_prompt(TEST_SYSTEM_PROMPT, "Alice", memory_context=memory_ctx)
+        assert result.startswith(TEST_SYSTEM_PROMPT)
         self._assert_has_eastern_datetime(result)
         assert result.endswith("The current user is Alice.")
         # Memory should come before user identity
@@ -750,9 +753,14 @@ class TestBuildSystemPrompt:
             mock_dt.now.return_value = fake_now
             mock_dt.side_effect = lambda *a, **kw: datetime(*a, **kw)
             fake_now_strftime = fake_now.strftime("%A, %B %-d, %Y at %-I:%M %p ET")
-            result = _build_system_prompt(None)
+            result = _build_system_prompt(TEST_SYSTEM_PROMPT, None)
             assert f"Current date and time: {fake_now_strftime}." in result
             mock_dt.now.assert_called_once()
+
+    def test_custom_base_prompt(self):
+        result = _build_system_prompt("Custom prompt", "Alice")
+        assert result.startswith("Custom prompt")
+        assert "The current user is Alice." in result
 
 
 # -- Memory store tests ------------------------------------------------------
@@ -1320,7 +1328,7 @@ class TestInlineConfirmation:
         assert "cancel_transfer" in names
 
     def test_staged_this_turn_cleared_each_call(self, mock_client):
-        agent = Agent(mock_client)
+        agent = Agent(mock_client, agent_config=AgentConfig(model="claude-opus-4-6", system_prompt=TEST_SYSTEM_PROMPT))
 
         mock_response = MagicMock()
         mock_response.content = [_make_text_block("ok")]
@@ -1335,7 +1343,7 @@ class TestInlineConfirmation:
             assert agent.staged_this_turn == []
 
     def test_staged_this_turn_populated(self, mock_client):
-        agent = Agent(mock_client)
+        agent = Agent(mock_client, agent_config=AgentConfig(model="claude-opus-4-6", system_prompt=TEST_SYSTEM_PROMPT))
 
         # Simulate a tool call that stages a transfer
         tool_response = MagicMock()

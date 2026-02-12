@@ -14,13 +14,12 @@ services:
       - SEQUENCE_KYC_ID
       - SEQUENCE_AUTH0_CLIENT_ID
       - TELEGRAM_BOT_TOKEN
-      - TELEGRAM_USER_NAMES
-      - TELEGRAM_GROUP_ID
       - ANTHROPIC_API_KEY
       - BOT_DATA_DIR=/app/data
       - SEQUENCE_DATA_DIR=/app/data
     volumes:
       - bot-data:/app/data
+      - ./bot-config.yaml:/app/data/bot-config.yaml:ro
 
 volumes:
   bot-data:

@@ -64,11 +64,13 @@ Standalone HTTP client for consuming the REST API. No SDK dependency.
 ### pysequence-bot
 Optional Telegram bot that uses the SDK directly with a Claude AI agent.
 
-- `config.py` — `SdkConfig`, `AgentConfig`, `TelegramConfig`, env var loading
+- `config.py` — `SdkConfig`, `AgentConfig`, `TelegramConfig`, YAML config loading (`load_config()`)
 - `ai/agent.py` — Claude-powered agent with tool-use loop
 - `ai/tools.py` — Tool definitions and execution against the SDK
 - `ai/memory.py` — Persistent JSON-backed memory store
 - `telegram/bot.py` — Telegram bot handlers, rate limiting, transfer confirmation
+
+Non-secret configuration (model, limits, rate limits, system prompt, user mappings) lives in `bot-config.yaml` at the repo root. The bot loads this file on startup. Users copy it, edit it, and mount it into Docker — no code changes needed. Secrets (`TELEGRAM_BOT_TOKEN`, `ANTHROPIC_API_KEY`, `SEQUENCE_*`) always come from environment variables.
 
 ## SDK Usage
 
@@ -146,9 +148,8 @@ The SDK uses `curl_cffi` with Chrome configuration for browser-compatible HTTP r
 | `SEQUENCE_MAX_TRANSFER_CENTS` | No | `1000000` | Per-transfer limit ($10,000) |
 | `SEQUENCE_MAX_DAILY_TRANSFER_CENTS` | No | `2500000` | Daily transfer limit ($25,000) |
 | `TELEGRAM_BOT_TOKEN` | Bot | — | Telegram bot token |
-| `TELEGRAM_USER_NAMES` | Bot | — | Comma-separated `id:name` pairs (e.g. `12345:Alice,67890:Bob`) |
-| `TELEGRAM_GROUP_ID` | Bot | — | Allowed Telegram group ID |
 | `ANTHROPIC_API_KEY` | Bot | — | Anthropic API key for Claude |
+| `BOT_CONFIG` | No | `BOT_DATA_DIR/bot-config.yaml` | Path to `bot-config.yaml` |
 | `BOT_DATA_DIR` | No | `.` | Directory for bot data files (memories, limits) |
 
 ## API Details

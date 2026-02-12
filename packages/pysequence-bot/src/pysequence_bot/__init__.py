@@ -3,7 +3,7 @@ from pysequence_bot.config import (
     SdkConfig,
     TelegramConfig,
     get_sdk_config,
-    get_telegram_config,
+    load_config,
 )
 
 __all__ = [
@@ -11,5 +11,5 @@ __all__ = [
     "SdkConfig",
     "TelegramConfig",
     "get_sdk_config",
-    "get_telegram_config",
+    "load_config",
 ]
