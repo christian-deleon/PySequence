@@ -1,9 +1,9 @@
-name: Publish Client Package
+name: Publish Packages
 
 on:
   push:
     tags:
-      - "client-v*"
+      - "v*"
 
 permissions:
   contents: write
@@ -11,9 +11,6 @@ permissions:
 jobs:
   publish:
     runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: packages/pysequence-client
 
     steps:
       - uses: actions/checkout@v4
@@ -25,10 +22,17 @@ jobs:
       - name: Install Poetry
         run: pip install "poetry==2.3.2"
 
-      - name: Build package
+      - name: Build SDK
         run: poetry build
+        working-directory: packages/pysequence-sdk
 
-      - name: Upload wheel to GitHub Release
+      - name: Build Client
+        run: poetry build
+        working-directory: packages/pysequence-client
+
+      - name: Upload wheels to GitHub Release
         uses: softprops/action-gh-release@v2
         with:
-          files: packages/pysequence-client/dist/*
+          files: |
+            packages/pysequence-sdk/dist/*
+            packages/pysequence-client/dist/*
