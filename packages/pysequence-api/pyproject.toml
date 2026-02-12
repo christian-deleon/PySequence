@@ -1,6 +1,6 @@
 [project]
 name = "pysequence-api"
-version = "0.1.0"
+version = "0.2.1"
 description = "Unofficial FastAPI REST server for the GetSequence SDK"
 authors = [
     {name = "Christian De Leon", email = "christian@deleon.me"}
