@@ -7,10 +7,12 @@ on:
 
 permissions:
   contents: write
+  id-token: write
 
 jobs:
   publish:
     runs-on: ubuntu-latest
+    environment: pypi
 
     steps:
       - uses: actions/checkout@v4
@@ -29,6 +31,16 @@ jobs:
       - name: Build Client
         run: poetry build
         working-directory: packages/pysequence-client
+
+      - name: Publish SDK to PyPI
+        uses: pypa/gh-action-pypi-publish@release/v1
+        with:
+          packages-dir: packages/pysequence-sdk/dist/
+
+      - name: Publish Client to PyPI
+        uses: pypa/gh-action-pypi-publish@release/v1
+        with:
+          packages-dir: packages/pysequence-client/dist/
 
       - name: Upload wheels to GitHub Release
         uses: softprops/action-gh-release@v2
