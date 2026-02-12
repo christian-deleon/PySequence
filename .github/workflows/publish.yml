@@ -37,12 +37,10 @@ jobs:
         with:
           packages-dir: packages/pysequence-sdk/dist/
 
-      # TODO: Uncomment after pysequence-sdk is published and pysequence-client
-      # trusted publisher is registered on PyPI.
-      # - name: Publish Client to PyPI
-      #   uses: pypa/gh-action-pypi-publish@release/v1
-      #   with:
-      #     packages-dir: packages/pysequence-client/dist/
+      - name: Publish Client to PyPI
+        uses: pypa/gh-action-pypi-publish@release/v1
+        with:
+          packages-dir: packages/pysequence-client/dist/
 
       - name: Upload wheels to GitHub Release
         uses: softprops/action-gh-release@v2
