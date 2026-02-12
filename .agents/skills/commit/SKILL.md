@@ -1,33 +1,30 @@
 ---
 name: commit
-description: Stage changes and create a Conventional Commits message
+description: Stage and commit changes following project conventions.
+  Use after all quality checks pass.
 ---
 
 # Commit
 
-Stage changes and create a commit with a Conventional Commits message.
+Stage and commit changes using the conventions defined in
+CONTRIBUTING.md.
+
+## Prerequisites
+
+- Run the validate skill first. All checks must pass.
 
 ## Steps
 
-1. **Review changes** — Run `git status` and `git diff` to understand what changed.
-
-2. **Stage specific files** — Add files individually with `git add <file>`. Never use `git add -A` or `git add .` to avoid accidentally staging secrets or generated files.
-
-3. **Craft commit message** — Write a Conventional Commits message:
-   ```
-   <type>: <description>
-   ```
-   Types: `feat`, `fix`, `chore`, `docs`, `ci`, `test`, `refactor`
-
-   - Keep the description concise (under 72 characters)
-   - Focus on *why*, not *what*
-   - Use imperative mood ("add feature" not "added feature")
-
-4. **Commit** — Create the commit and verify with `git status`.
-
-## Rules
-
-- Never commit `.tokens.json`, `.env`, credentials, or secrets
-- Never use `--no-verify` unless explicitly requested
-- Never amend previous commits unless explicitly requested
-- If a pre-commit hook fails, fix the issue and create a NEW commit
+1. Read the Commit Conventions section of CONTRIBUTING.md for
+   the format rules.
+2. Review the staged and unstaged changes to understand what
+   was changed.
+3. Group changes into logical units. Each commit should represent
+   one coherent change. If changes span multiple concerns (e.g., a
+   bug fix and a refactor), they should be separate commits.
+4. For each logical group:
+   a. Determine the appropriate commit type and scope.
+   b. Construct a commit message that follows the documented format.
+   c. Stage only the files belonging to that group.
+   d. Commit with the constructed message.
+5. Confirm all commits were created and display the messages.

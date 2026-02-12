@@ -1,49 +1,29 @@
 ---
 name: pr
-description: Create a branch, push, and open a pull request
+description: Create a branch and open a pull request via GitHub CLI.
+  Use after changes are committed.
 ---
 
 # Pull Request
 
-Create a properly formatted pull request targeting `main`.
+Create a feature branch, push changes, and open a PR using `gh` CLI.
+
+## Prerequisites
+
+- `gh` CLI must be installed and authenticated.
+- Changes must already be committed using the commit skill.
 
 ## Steps
 
-1. **Create branch** — If not already on a feature branch, create one:
-   ```
-   feature/<description>   # New features
-   fix/<description>       # Bug fixes
-   chore/<description>     # Maintenance
-   docs/<description>      # Documentation
-   ```
-   Use kebab-case for the description.
-
-2. **Push branch** — Push with upstream tracking:
-   ```bash
-   git push -u origin <branch-name>
-   ```
-
-3. **Create PR** — Use `gh pr create` with:
-   - **Title**: Conventional Commits format (`<type>: <description>`)
-   - **Body**: Summary + Test Plan using the repo's PR template
-   - **Target**: `main`
-
-   ```bash
-   gh pr create --title "<type>: <description>" --body "$(cat <<'EOF'
-   ## Summary
-   - <what changed and why>
-
-   ## Test Plan
-   - [ ] `just lint` passes
-   - [ ] `just test-unit` passes
-   EOF
-   )"
-   ```
-
-4. **Return PR URL** — Share the URL so the user can review.
-
-## Rules
-
-- One logical change per PR
-- PR title must be Conventional Commits format (it becomes the squash commit message)
-- Always target `main`
+1. Read the Branch Naming section of CONTRIBUTING.md for the
+   naming convention.
+2. Create a new branch from the current HEAD following the
+   naming convention.
+3. Push the branch to the remote.
+4. Read .github/pull_request_template.md for the expected PR
+   body structure.
+5. Construct the PR title following the Conventional Commits
+   format documented in CONTRIBUTING.md.
+6. Fill in the PR body template based on the committed changes.
+7. Open the PR using `gh pr create` targeting the default branch.
+8. Display the PR URL.

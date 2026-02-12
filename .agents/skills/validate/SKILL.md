@@ -1,17 +1,19 @@
 ---
 name: validate
-description: Run lint and unit tests to validate code quality
+description: Run all project quality checks and report results.
+  Use before committing or opening a PR.
 ---
 
 # Validate
 
-Run formatting checks and unit tests to ensure code quality.
+Run all project quality checks and report results.
 
 ## Steps
 
-1. **Check formatting** — Run `just lint` to verify Black formatting.
-   - If it fails, run `just fmt` to auto-fix, then run `just lint` again to confirm.
-
-2. **Run unit tests** — Run `just test-unit` to execute unit tests in Docker.
-
-3. **Report results** — Summarize pass/fail status for both lint and tests.
+1. Read the Quick Reference section of AGENTS.md for the exact commands.
+2. Run the format check command. Report pass or fail.
+3. Run the lint command. Report pass or fail.
+4. Run the build command. Report pass or fail.
+5. Run the test command. Report pass or fail.
+6. Summarize results. If anything failed, stop here — do not
+   proceed to commit or PR.
