@@ -27,6 +27,7 @@ RUN playwright install --with-deps chromium
 COPY packages/pysequence-sdk/src/ packages/pysequence-sdk/src/
 COPY packages/pysequence-api/src/ packages/pysequence-api/src/
 COPY packages/pysequence-client/src/ packages/pysequence-client/src/
+COPY packages/pysequence-bot/src/ packages/pysequence-bot/src/
 
 RUN poetry install --without dev
 
