@@ -1,6 +1,6 @@
 [project]
 name = "pysequence-bot"
-version = "0.2.2"
+version = "0.2.3"
 description = "Optional Telegram bot for the PySequence SDK"
 requires-python = ">=3.11"
 dependencies = [

@@ -1,6 +1,6 @@
 [project]
 name = "pysequence-sdk"
-version = "0.2.2"
+version = "0.2.3"
 description = "Unofficial Python SDK for the GetSequence personal finance platform"
 authors = [
     {name = "Christian De Leon", email = "christian@deleon.me"}
