@@ -1,0 +1,38 @@
+[project]
+name = "pysequence"
+version = "0.1.0"
+description = ""
+authors = [
+    {name = "Christian De Leon", email = "christian@deleon.me"}
+]
+license = {text = "MIT"}
+requires-python = ">=3.11"
+dependencies = []
+
+[tool.poetry]
+package-mode = false
+
+[tool.poetry.dependencies]
+pysequence-sdk = {path = "packages/pysequence-sdk", develop = true}
+pysequence-api = {path = "packages/pysequence-api", develop = true}
+pysequence-client = {path = "packages/pysequence-client", develop = true}
+
+[dependency-groups]
+dev = [
+    "pytest (>=9.0.2,<10.0.0)",
+    "pytest-timeout (>=2.3.1,<3.0.0)",
+    "black (>=26.1.0,<27.0.0)",
+]
+
+[tool.pytest.ini_options]
+testpaths = [
+    "packages/pysequence-sdk/tests",
+    "packages/pysequence-api/tests",
+    "packages/pysequence-client/tests",
+]
+markers = ["integration: tests that hit the real Sequence API (deselected by default)"]
+addopts = "--import-mode=importlib -m 'not integration'"
+
+[build-system]
+requires = ["poetry-core>=2.0.0,<3.0.0"]
+build-backend = "poetry.core.masonry.api"

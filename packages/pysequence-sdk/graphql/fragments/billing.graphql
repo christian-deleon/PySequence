@@ -1,0 +1,21 @@
+fragment BillingSubscription on SubscriptionPayment {
+  id
+  status
+  plan
+  name
+  interval
+  price {
+    formatted
+    __typename
+  }
+  nextPaymentDate
+  discountCoupon
+  cancelAt
+  cashbackPercentage
+  capabilities {
+    name
+    upgradeRequired
+    __typename
+  }
+  __typename
+}

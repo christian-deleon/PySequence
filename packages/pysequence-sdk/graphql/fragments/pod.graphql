@@ -1,0 +1,156 @@
+fragment MapPod on Pod {
+  id
+  name
+  icon
+  description
+  type
+  createdAt
+  __typename
+}
+
+fragment PodNode on Pod {
+  __typename
+  id
+  name
+  icon
+  description
+  beneficiaryName
+  type
+  createdAt
+  metadata {
+    __typename
+    id
+    balance {
+      cents
+      formatted
+      __typename
+    }
+  }
+  showSequenceBalance
+  showManualLiabilityNotification
+  showManualLiabilityFundsArrivedNotification
+  linkedAccountId
+  goalAmountInCents
+  liabilityMetadata {
+    ... on LiabilityMetadata {
+      __typename
+      id
+      subtype
+      institution {
+        id
+        logo
+        __typename
+      }
+      balance {
+        formatted
+        __typename
+      }
+      lastStatementBalance {
+        formatted
+        __typename
+      }
+      nextPaymentMinimumAmount {
+        formatted
+        __typename
+      }
+    }
+    ... on ErrorMetadata {
+      __typename
+      errorCode
+    }
+    __typename
+  }
+  limits {
+    dailyCreditLimit {
+      cents
+      __typename
+    }
+    remainingDailyCreditLimit {
+      cents
+      formatted
+      __typename
+    }
+    remainingMonthlyCreditLimit {
+      cents
+      formatted
+      __typename
+    }
+    __typename
+  }
+}
+
+fragment PodDrawer on Pod {
+  id
+  name
+  icon
+  beneficiaryName
+  bankAccountNumber
+  externalAccountId
+  routingNumber
+  showSequenceBalance
+  showManualLiabilityNotification
+  showManualLiabilityFundsArrivedNotification
+  goalAmountInCents
+  linkedAccount {
+    id
+    pendingDisconnectCode
+    name
+    __typename
+  }
+  metadata {
+    id
+    balance {
+      cents
+      formatted
+      __typename
+    }
+    __typename
+  }
+  liabilityMetadata {
+    ... on LiabilityMetadata {
+      __typename
+      id
+      name
+      mask
+      balance {
+        formatted
+        __typename
+      }
+      balanceLastUpdated
+      nextPaymentMinimumAmount {
+        cents
+        formatted
+        __typename
+      }
+      nextPaymentDueDate
+      interestRatePercentage
+      lastStatementBalance {
+        formatted
+        __typename
+      }
+      subtype
+    }
+    ... on ErrorMetadata {
+      __typename
+      errorCode
+      displayMessage
+    }
+    __typename
+  }
+  __typename
+}
+
+fragment DebitCardsPod on Pod {
+  id
+  name
+  icon
+  metadata {
+    id
+    balance {
+      formatted
+      __typename
+    }
+    __typename
+  }
+  __typename
+}

@@ -1,0 +1,77 @@
+fragment MapAccount on Account {
+  id
+  name
+  icon
+  description
+  type
+  providerType
+  institutionName
+  routingNumber
+  bankAccountNumber
+  beneficiaryName
+  createdAt
+  canBeSourceOfTransfer
+  __typename
+}
+
+fragment AccountNode on Account {
+  __typename
+  id
+  name
+  type
+  providerType
+  canBeSourceOfTransfer
+  icon
+  pendingDisconnectCode
+  description
+  routingNumber
+  bankAccountNumber
+  institutionName
+  beneficiaryName
+  createdAt
+  capabilities
+  liabilityLinkedWithPlaid
+  isPendingKyc
+  metadata {
+    ... on PlaidMetadata {
+      __typename
+      id
+      balance {
+        cents
+        formatted
+        __typename
+      }
+      institution {
+        id
+        name
+        logo
+        __typename
+      }
+    }
+    ... on MethodMetadata {
+      __typename
+      id
+      balance {
+        cents
+        formatted
+        __typename
+      }
+      institution {
+        id
+        name
+        logo
+        __typename
+      }
+    }
+    ... on ManualAccountMetadata {
+      __typename
+      id
+      balance {
+        cents
+        formatted
+        __typename
+      }
+    }
+    __typename
+  }
+}

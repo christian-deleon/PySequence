@@ -1,0 +1,64 @@
+fragment TransferReferenceNode on TransferReference {
+  id
+  type
+  status
+  errorReason
+  createdAt
+  amount {
+    cents
+    formatted
+    __typename
+  }
+  source {
+    ... on Pod {
+      id
+      name
+      icon
+      __typename
+    }
+    ... on Port {
+      id
+      name
+      icon
+      __typename
+    }
+    ... on Account {
+      id
+      name
+      icon
+      __typename
+    }
+    __typename
+  }
+  destination {
+    ... on Pod {
+      id
+      name
+      icon
+      __typename
+    }
+    ... on Port {
+      id
+      name
+      icon
+      __typename
+    }
+    ... on Account {
+      id
+      name
+      icon
+      __typename
+    }
+    __typename
+  }
+  __typename
+}
+
+fragment TransferReferenceEdge on TransferReferenceEdge {
+  cursor
+  node {
+    ...TransferReferenceNode
+    __typename
+  }
+  __typename
+}

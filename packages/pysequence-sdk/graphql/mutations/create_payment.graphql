@@ -1,0 +1,89 @@
+mutation CreatePayment($id: ID!, $source: PaymentAccountInput!, $destination: PaymentAccountInput!, $amount: Int!, $isInstantTransfer: Boolean, $achDescription: String) {
+  forKYC(id: $id) {
+    createPayment(
+      fields: {amount: $amount, source: $source, destination: $destination, isInstantTransfer: $isInstantTransfer, achDescription: $achDescription}
+    ) {
+      ok {
+        organization {
+          id
+          ports {
+            ...MapPort
+            __typename
+          }
+          pods {
+            ...MapPod
+            __typename
+          }
+          rules {
+            ...RuleDetails
+            __typename
+          }
+          transferReferences {
+            pageInfo {
+              endCursor
+              hasNextPage
+              hasPreviousPage
+              startCursor
+              __typename
+            }
+            edges {
+              node {
+                id
+                type
+                status
+                errorReason
+                createdAt
+                amount {
+                  cents
+                  formatted
+                  __typename
+                }
+                source {
+                  ... on Pod {
+                    id
+                    name
+                    icon
+                    __typename
+                  }
+                  ... on Port {
+                    id
+                    name
+                    icon
+                    __typename
+                  }
+                  __typename
+                }
+                destination {
+                  ... on Pod {
+                    id
+                    name
+                    icon
+                    __typename
+                  }
+                  ... on Port {
+                    id
+                    name
+                    icon
+                    __typename
+                  }
+                  __typename
+                }
+                __typename
+              }
+              __typename
+            }
+            __typename
+          }
+          __typename
+        }
+        __typename
+      }
+      error {
+        message
+        __typename
+      }
+      __typename
+    }
+    __typename
+  }
+}

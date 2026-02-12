@@ -1,0 +1,51 @@
+fragment MapPort on Port {
+  id
+  name
+  icon
+  description
+  externalAccountId
+  beneficiaryName
+  bankAccountNumber
+  routingNumber
+  createdAt
+  __typename
+}
+
+fragment PortNode on Port {
+  __typename
+  id
+  externalAccountId
+  name
+  icon
+  description
+  beneficiaryName
+  bankAccountNumber
+  routingNumber
+  createdAt
+  metadata {
+    __typename
+    id
+    balance {
+      cents
+      formatted
+      __typename
+    }
+  }
+  limits {
+    dailyCreditLimit {
+      cents
+      __typename
+    }
+    remainingDailyCreditLimit {
+      cents
+      formatted
+      __typename
+    }
+    remainingMonthlyCreditLimit {
+      cents
+      formatted
+      __typename
+    }
+    __typename
+  }
+}

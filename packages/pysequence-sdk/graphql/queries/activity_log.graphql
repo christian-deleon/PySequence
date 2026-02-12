@@ -1,0 +1,64 @@
+query ActivityLogV2Transfers($organizationId: ID!, $transferFilter: TransferReferenceFilter!, $after: String, $first: Int!, $numberOfTransfersFilter: TransferReferenceFilter!) {
+  me {
+    id
+    offer(location: ACTIVITY_LOG) {
+      id
+      type
+      name
+      userId
+      status
+      linkedPodId
+      linkedAccountId
+      linkedTransferReferenceId
+      data
+      location
+      createdAt
+      updatedAt
+      __typename
+    }
+    __typename
+  }
+  organization(id: $organizationId) {
+    id
+    firstTransferDate
+    kycs {
+      id
+      name
+      kycType
+      __typename
+    }
+    numberOfTransfers(filter: $numberOfTransfersFilter) {
+      count
+      __typename
+    }
+    plan {
+      id
+      name
+      transactionsPerMonth
+      transferExtraCharge {
+        formatted
+        __typename
+      }
+      __typename
+    }
+    subscriptionPayment {
+      ...BillingSubscription
+      __typename
+    }
+    transferReferences(filter: $transferFilter, after: $after, first: $first) {
+      pageInfo {
+        endCursor
+        hasNextPage
+        hasPreviousPage
+        startCursor
+        __typename
+      }
+      edges {
+        ...TransferReferenceEdge
+        __typename
+      }
+      __typename
+    }
+    __typename
+  }
+}

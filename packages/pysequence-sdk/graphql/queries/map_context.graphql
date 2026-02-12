@@ -1,0 +1,30 @@
+query MapContextMe($organizationId: ID!) {
+  organization(id: $organizationId) {
+    id
+    ports {
+      ...MapPort
+      __typename
+    }
+    accounts {
+      ...MapAccount
+      __typename
+    }
+    pods {
+      ...MapPod
+      __typename
+    }
+    ruleConnections {
+      ...MapRuleConnection
+      __typename
+    }
+    ghostNodes {
+      ...MapGhostNode
+      __typename
+    }
+    mapState {
+      ...MapState
+      __typename
+    }
+    __typename
+  }
+}

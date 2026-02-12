@@ -1,0 +1,173 @@
+fragment RuleDetails on Rule {
+  __typename
+  id
+  priority
+  nickname
+  isNicknameManuallySet
+  transferDescription
+  description
+  enabled
+  isDirectDeposit
+  testModeEnabled
+  createdAt
+  trigger {
+    id
+    __typename
+    portId
+    podId
+    ... on FundsTransferTrigger {
+      id
+      accountId
+      __typename
+    }
+    ... on ScheduledTrigger {
+      cron
+      type
+      timezone
+      startDate
+      __typename
+    }
+    ... on RemoteApiTrigger {
+      endpoint
+      __typename
+    }
+    ... on ManualTrigger {
+      accountId
+      ghostNodeId
+      __typename
+    }
+  }
+  steps {
+    conditions {
+      __typename
+      condition {
+        fact
+        value
+        valueFact
+        valueFactParams {
+          portId
+          accountId
+          podId
+          port {
+            id
+            name
+            icon
+            __typename
+          }
+          pod {
+            id
+            name
+            icon
+            __typename
+          }
+          __typename
+        }
+        operator
+        __typename
+      }
+      ... on ConditionGroup {
+        combinator
+        conditions {
+          condition {
+            fact
+            value
+            valueFact
+            valueFactParams {
+              portId
+              accountId
+              podId
+              port {
+                id
+                name
+                icon
+                __typename
+              }
+              pod {
+                id
+                name
+                icon
+                __typename
+              }
+              __typename
+            }
+            operator
+            __typename
+          }
+          __typename
+        }
+        __typename
+      }
+    }
+    actions {
+      __typename
+      ... on PaymentAction {
+        amount
+        source {
+          id
+          type
+          name
+          icon
+          __typename
+        }
+        destination {
+          id
+          type
+          name
+          icon
+          __typename
+        }
+        isInstantTransfer
+        __typename
+      }
+    }
+    __typename
+  }
+}
+
+fragment MapRuleConnection on RuleConnection {
+  id
+  ruleId
+  sourceNodeId
+  destinationNodeId
+  __typename
+}
+
+fragment MapGhostNode on GhostNode {
+  id
+  name
+  icon
+  accountId
+  portId
+  account {
+    id
+    name
+    icon
+    __typename
+  }
+  port {
+    id
+    name
+    icon
+    __typename
+  }
+  __typename
+}
+
+fragment MapState on MapState {
+  nodes {
+    id
+    position {
+      x
+      y
+      __typename
+    }
+    __typename
+  }
+  viewport {
+    x
+    y
+    zoom
+    __typename
+  }
+  __typename
+}

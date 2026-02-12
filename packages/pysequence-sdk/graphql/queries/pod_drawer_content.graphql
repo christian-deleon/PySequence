@@ -1,0 +1,59 @@
+query PodDrawerContent($organizationId: ID!, $id: ID!) {
+  organization(id: $organizationId) {
+    id
+    pod(id: $id) {
+      ...PodDrawer
+      offer(location: POD_DRAWER) {
+        id
+        type
+        name
+        userId
+        status
+        linkedPodId
+        linkedAccountId
+        linkedTransferReferenceId
+        data
+        location
+        createdAt
+        updatedAt
+        __typename
+      }
+      debitCardOffer {
+        id
+        type
+        name
+        userId
+        status
+        linkedPodId
+        linkedAccountId
+        linkedTransferReferenceId
+        data
+        location
+        createdAt
+        updatedAt
+        __typename
+      }
+      transferReferences(first: 5) {
+        edges {
+          ...TransferReferenceEdge
+          __typename
+        }
+        __typename
+      }
+      debitCards {
+        ...PodDrawerDebitCard
+        __typename
+      }
+      virtualDebitCard {
+        ...PodDrawerDebitCard
+        __typename
+      }
+      physicalDebitCard {
+        ...PodDrawerDebitCard
+        __typename
+      }
+      __typename
+    }
+    __typename
+  }
+}

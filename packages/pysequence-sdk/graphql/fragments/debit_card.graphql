@@ -1,0 +1,102 @@
+fragment DebitCardTransactions on CardTransaction {
+  id
+  amount {
+    formatted
+    __typename
+  }
+  direction
+  summary
+  createdAt
+  __typename
+}
+
+fragment PodDrawerDebitCard on DebitCard {
+  id
+  last4Digits
+  expirationDate
+  holderName
+  status
+  transactions {
+    ...DebitCardTransactions
+    __typename
+  }
+  authorizations {
+    ...DebitCardTransactions
+    __typename
+  }
+  cashback {
+    formatted
+    __typename
+  }
+  cashbackPercentage
+  pinSet
+  type
+  holderType
+  pod {
+    id
+    name
+    metadata {
+      id
+      balance {
+        formatted
+        __typename
+      }
+      __typename
+    }
+    __typename
+  }
+  __typename
+}
+
+fragment DebitCardsDebitCard on DebitCard {
+  id
+  last4Digits
+  holderName
+  amountSpent {
+    formatted
+    __typename
+  }
+  type
+  status
+  expirationDate
+  holderType
+  __typename
+}
+
+fragment DebitCardsOmniCard on OmniCard {
+  id
+  holderType
+  fundingAccount {
+    id
+    name
+    icon
+    metadata {
+      id
+      balance {
+        formatted
+        __typename
+      }
+      __typename
+    }
+    __typename
+  }
+  kyc {
+    id
+    kycType
+    name
+    __typename
+  }
+  metadata {
+    id
+    holderName
+    last4Digits
+    expirationDate
+    status
+    amountSpent {
+      formatted
+      __typename
+    }
+    __typename
+  }
+  __typename
+}

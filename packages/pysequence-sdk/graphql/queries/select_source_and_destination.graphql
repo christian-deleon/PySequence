@@ -1,0 +1,26 @@
+query SelectSourceAndDestination {
+  me {
+    id
+    memberships {
+      id
+      organization {
+        id
+        ports {
+          ...PortNode
+          __typename
+        }
+        pods {
+          ...PodNode
+          __typename
+        }
+        accounts {
+          ...AccountNode
+          __typename
+        }
+        __typename
+      }
+      __typename
+    }
+    __typename
+  }
+}

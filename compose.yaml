@@ -1,0 +1,24 @@
+name: pysequence
+
+services:
+
+  api:
+    build:
+      target: prod
+    restart: unless-stopped
+    ports:
+      - "8720:8720"
+    environment:
+      - SEQUENCE_EMAIL
+      - SEQUENCE_PASSWORD
+      - SEQUENCE_TOTP
+      - SEQUENCE_ORG_ID
+      - SEQUENCE_KYC_ID
+      - SEQUENCE_AUTH0_CLIENT_ID
+      - SEQUENCE_API_KEY
+      - SEQUENCE_DATA_DIR=/app/data
+    volumes:
+      - data:/app/data
+
+volumes:
+  data:
