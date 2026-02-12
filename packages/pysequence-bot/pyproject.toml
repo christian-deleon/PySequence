@@ -2,12 +2,23 @@
 name = "pysequence-bot"
 version = "0.2.3"
 description = "Optional Telegram bot for the PySequence SDK"
+authors = [
+    {name = "Christian De Leon", email = "christian@deleon.me"}
+]
+license = {text = "MIT"}
 requires-python = ">=3.11"
 dependencies = [
     "anthropic (>=0.79.0,<1.0.0)",
     "python-telegram-bot (>=22.6,<23.0)",
     "pyyaml (>=6.0.3,<7.0.0)",
 ]
+readme = "README.md"
+
+[project.urls]
+Homepage = "https://github.com/christian-deleon/PySequence"
+Repository = "https://github.com/christian-deleon/PySequence"
+Documentation = "https://github.com/christian-deleon/PySequence/blob/main/docs/telegram-bot.md"
+Changelog = "https://github.com/christian-deleon/PySequence/releases"
 
 [tool.poetry]
 packages = [{include = "pysequence_bot", from = "src"}]

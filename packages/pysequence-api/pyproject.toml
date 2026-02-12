@@ -11,6 +11,13 @@ dependencies = [
     "fastapi (>=0.128.8,<0.129.0)",
     "uvicorn (>=0.40.0,<0.41.0)",
 ]
+readme = "README.md"
+
+[project.urls]
+Homepage = "https://github.com/christian-deleon/PySequence"
+Repository = "https://github.com/christian-deleon/PySequence"
+Documentation = "https://github.com/christian-deleon/PySequence/blob/main/docs/api-server.md"
+Changelog = "https://github.com/christian-deleon/PySequence/releases"
 
 [tool.poetry]
 packages = [{include = "pysequence_api", from = "src"}]
