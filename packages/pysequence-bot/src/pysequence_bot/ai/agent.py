@@ -125,8 +125,10 @@ class Agent:
 
             if response.stop_reason != "tool_use":
                 # Extract text from response
-                text_parts = [b.text for b in response.content if b.type == "text"]
-                return "\n".join(text_parts)
+                text_parts = [
+                    b.text for b in response.content if b.type == "text" and b.text
+                ]
+                return "\n".join(text_parts) if text_parts else "Here you go!"
 
             # Execute tool calls and append results
             tool_results = []

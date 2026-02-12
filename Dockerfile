@@ -10,10 +10,10 @@ RUN pip install --no-cache-dir "poetry==2.3.2" \
 FROM base AS deps
 
 COPY pyproject.toml poetry.lock ./
-COPY packages/pysequence-sdk/pyproject.toml packages/pysequence-sdk/
-COPY packages/pysequence-api/pyproject.toml packages/pysequence-api/
-COPY packages/pysequence-client/pyproject.toml packages/pysequence-client/
-COPY packages/pysequence-bot/pyproject.toml packages/pysequence-bot/
+COPY packages/pysequence-sdk/pyproject.toml packages/pysequence-sdk/README.md packages/pysequence-sdk/
+COPY packages/pysequence-api/pyproject.toml packages/pysequence-api/README.md packages/pysequence-api/
+COPY packages/pysequence-client/pyproject.toml packages/pysequence-client/README.md packages/pysequence-client/
+COPY packages/pysequence-bot/pyproject.toml packages/pysequence-bot/README.md packages/pysequence-bot/
 
 # ---------------------------------------------------------------------------
 
