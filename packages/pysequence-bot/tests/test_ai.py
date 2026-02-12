@@ -598,7 +598,12 @@ def _make_tool_use_block(tool_id, name, tool_input):
 
 class TestAgent:
     def test_simple_text_response(self, mock_client):
-        agent = Agent(mock_client, agent_config=AgentConfig(model="claude-opus-4-6", system_prompt=TEST_SYSTEM_PROMPT))
+        agent = Agent(
+            mock_client,
+            agent_config=AgentConfig(
+                model="claude-opus-4-6", system_prompt=TEST_SYSTEM_PROMPT
+            ),
+        )
 
         mock_response = MagicMock()
         mock_response.content = [_make_text_block("Hello!")]
@@ -614,7 +619,12 @@ class TestAgent:
         mock_create.assert_called_once()
 
     def test_tool_use_loop(self, mock_client):
-        agent = Agent(mock_client, agent_config=AgentConfig(model="claude-opus-4-6", system_prompt=TEST_SYSTEM_PROMPT))
+        agent = Agent(
+            mock_client,
+            agent_config=AgentConfig(
+                model="claude-opus-4-6", system_prompt=TEST_SYSTEM_PROMPT
+            ),
+        )
 
         # First response: tool use
         tool_response = MagicMock()
@@ -638,7 +648,12 @@ class TestAgent:
         assert len(agent._messages) == 4
 
     def test_conversation_history_grows(self, mock_client):
-        agent = Agent(mock_client, agent_config=AgentConfig(model="claude-opus-4-6", system_prompt=TEST_SYSTEM_PROMPT))
+        agent = Agent(
+            mock_client,
+            agent_config=AgentConfig(
+                model="claude-opus-4-6", system_prompt=TEST_SYSTEM_PROMPT
+            ),
+        )
 
         mock_response = MagicMock()
         mock_response.content = [_make_text_block("Response")]
@@ -654,7 +669,12 @@ class TestAgent:
         assert len(agent._messages) == 4
 
     def test_temperature_is_zero(self, mock_client):
-        agent = Agent(mock_client, agent_config=AgentConfig(model="claude-opus-4-6", system_prompt=TEST_SYSTEM_PROMPT))
+        agent = Agent(
+            mock_client,
+            agent_config=AgentConfig(
+                model="claude-opus-4-6", system_prompt=TEST_SYSTEM_PROMPT
+            ),
+        )
 
         mock_response = MagicMock()
         mock_response.content = [_make_text_block("ok")]
@@ -671,7 +691,12 @@ class TestAgent:
         assert call_kwargs["system"].startswith(TEST_SYSTEM_PROMPT)
 
     def test_system_prompt_includes_user_name(self, mock_client):
-        agent = Agent(mock_client, agent_config=AgentConfig(model="claude-opus-4-6", system_prompt=TEST_SYSTEM_PROMPT))
+        agent = Agent(
+            mock_client,
+            agent_config=AgentConfig(
+                model="claude-opus-4-6", system_prompt=TEST_SYSTEM_PROMPT
+            ),
+        )
 
         mock_response = MagicMock()
         mock_response.content = [_make_text_block("ok")]
@@ -687,7 +712,12 @@ class TestAgent:
         assert call_kwargs["system"].startswith(TEST_SYSTEM_PROMPT)
 
     def test_system_prompt_without_user_name(self, mock_client):
-        agent = Agent(mock_client, agent_config=AgentConfig(model="claude-opus-4-6", system_prompt=TEST_SYSTEM_PROMPT))
+        agent = Agent(
+            mock_client,
+            agent_config=AgentConfig(
+                model="claude-opus-4-6", system_prompt=TEST_SYSTEM_PROMPT
+            ),
+        )
 
         mock_response = MagicMock()
         mock_response.content = [_make_text_block("ok")]
@@ -731,14 +761,18 @@ class TestBuildSystemPrompt:
 
     def test_with_memory_context(self):
         memory_ctx = "Things you remember:\n- [id-1] Savings is called The Vault (saved by Alice)"
-        result = _build_system_prompt(TEST_SYSTEM_PROMPT, None, memory_context=memory_ctx)
+        result = _build_system_prompt(
+            TEST_SYSTEM_PROMPT, None, memory_context=memory_ctx
+        )
         assert result.startswith(TEST_SYSTEM_PROMPT)
         self._assert_has_eastern_datetime(result)
         assert memory_ctx in result
 
     def test_with_memory_and_user_name(self):
         memory_ctx = "Things you remember:\n- [id-1] some fact (saved by Alice)"
-        result = _build_system_prompt(TEST_SYSTEM_PROMPT, "Alice", memory_context=memory_ctx)
+        result = _build_system_prompt(
+            TEST_SYSTEM_PROMPT, "Alice", memory_context=memory_ctx
+        )
         assert result.startswith(TEST_SYSTEM_PROMPT)
         self._assert_has_eastern_datetime(result)
         assert result.endswith("The current user is Alice.")
@@ -1328,7 +1362,12 @@ class TestInlineConfirmation:
         assert "cancel_transfer" in names
 
     def test_staged_this_turn_cleared_each_call(self, mock_client):
-        agent = Agent(mock_client, agent_config=AgentConfig(model="claude-opus-4-6", system_prompt=TEST_SYSTEM_PROMPT))
+        agent = Agent(
+            mock_client,
+            agent_config=AgentConfig(
+                model="claude-opus-4-6", system_prompt=TEST_SYSTEM_PROMPT
+            ),
+        )
 
         mock_response = MagicMock()
         mock_response.content = [_make_text_block("ok")]
@@ -1343,7 +1382,12 @@ class TestInlineConfirmation:
             assert agent.staged_this_turn == []
 
     def test_staged_this_turn_populated(self, mock_client):
-        agent = Agent(mock_client, agent_config=AgentConfig(model="claude-opus-4-6", system_prompt=TEST_SYSTEM_PROMPT))
+        agent = Agent(
+            mock_client,
+            agent_config=AgentConfig(
+                model="claude-opus-4-6", system_prompt=TEST_SYSTEM_PROMPT
+            ),
+        )
 
         # Simulate a tool call that stages a transfer
         tool_response = MagicMock()

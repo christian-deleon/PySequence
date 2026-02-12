@@ -139,9 +139,7 @@ def load_config() -> tuple[AgentConfig, TelegramConfig]:
         pending_transfer_ttl=safeguards_section.get(
             "pending_transfer_ttl", AgentConfig.pending_transfer_ttl
         ),
-        max_memory_facts=memory_section.get(
-            "max_facts", AgentConfig.max_memory_facts
-        ),
+        max_memory_facts=memory_section.get("max_facts", AgentConfig.max_memory_facts),
     )
 
     telegram_config = TelegramConfig(
@@ -151,9 +149,7 @@ def load_config() -> tuple[AgentConfig, TelegramConfig]:
         user_names=users,
         max_message_length=telegram_section.get("max_message_length", 2000),
         rate_limit_messages=telegram_section.get("rate_limit_messages", 10),
-        rate_limit_window_seconds=telegram_section.get(
-            "rate_limit_window_seconds", 60
-        ),
+        rate_limit_window_seconds=telegram_section.get("rate_limit_window_seconds", 60),
     )
 
     return agent_config, telegram_config

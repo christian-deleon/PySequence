@@ -32,7 +32,6 @@ from pysequence_bot.config import (
     load_config,
 )
 
-
 log = logging.getLogger(__name__)
 
 # Per-user sliding window rate limiter: user_id -> deque of timestamps

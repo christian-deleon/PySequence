@@ -187,9 +187,7 @@ class TestLoadConfig:
         assert telegram.rate_limit_window_seconds == 60
         assert telegram.max_message_length == 2000
 
-    def test_secrets_from_env(
-        self, monkeypatch: pytest.MonkeyPatch, tmp_path
-    ) -> None:
+    def test_secrets_from_env(self, monkeypatch: pytest.MonkeyPatch, tmp_path) -> None:
         monkeypatch.setenv("TELEGRAM_BOT_TOKEN", "my-secret-token")
         monkeypatch.setenv("ANTHROPIC_API_KEY", "sk-ant-secret")
         cfg_path = self._write_config(tmp_path)
@@ -200,9 +198,7 @@ class TestLoadConfig:
         assert telegram.bot_token == "my-secret-token"
         assert telegram.anthropic_api_key == "sk-ant-secret"
 
-    def test_secrets_required(
-        self, monkeypatch: pytest.MonkeyPatch, tmp_path
-    ) -> None:
+    def test_secrets_required(self, monkeypatch: pytest.MonkeyPatch, tmp_path) -> None:
         monkeypatch.delenv("TELEGRAM_BOT_TOKEN", raising=False)
         monkeypatch.delenv("ANTHROPIC_API_KEY", raising=False)
         cfg_path = self._write_config(tmp_path)
@@ -234,9 +230,7 @@ class TestLoadConfig:
         assert telegram.user_names == {12345: "Alice", 67890: "Bob"}
         assert telegram.allowed_user_ids == {12345, 67890}
 
-    def test_data_dir_fallback(
-        self, monkeypatch: pytest.MonkeyPatch, tmp_path
-    ) -> None:
+    def test_data_dir_fallback(self, monkeypatch: pytest.MonkeyPatch, tmp_path) -> None:
         """When BOT_CONFIG is not set, falls back to DATA_DIR / bot-config.yaml."""
         self._set_secrets(monkeypatch)
         monkeypatch.delenv("BOT_CONFIG", raising=False)
