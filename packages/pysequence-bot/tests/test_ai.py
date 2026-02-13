@@ -13,10 +13,13 @@ from pysequence_bot.ai.agent import Agent, _build_system_prompt
 from pysequence_bot.ai.memory import MemoryStore
 from pysequence_bot.ai.tools import (
     TOOLS,
-    execute_tool,
+    _find_account_by_name,
     _find_pod,
+    _find_port,
     _handle_confirm_transfer,
     _suggest_pods,
+    _suggest_ports,
+    execute_tool,
 )
 from pysequence_bot.config import AgentConfig, SdkConfig
 from pysequence_bot.telegram.bot import (
@@ -48,6 +51,23 @@ FAKE_PODS = [
     },
 ]
 
+FAKE_PORTS = [
+    {
+        "id": "port-1",
+        "name": "Payroll",
+        "organization_id": "org-1",
+        "balance_cents": 300000,
+        "balance": "$3,000.00",
+    },
+    {
+        "id": "port-2",
+        "name": "Side Hustle",
+        "organization_id": "org-1",
+        "balance_cents": 50000,
+        "balance": "$500.00",
+    },
+]
+
 
 @pytest.fixture
 def mock_client() -> MagicMock:
@@ -60,6 +80,11 @@ def mock_client() -> MagicMock:
         "total_balance_cents": 125000,
         "total_balance": "$1,250.00",
         "pod_count": 2,
+    }
+    client.get_all_accounts.return_value = {
+        "pods": FAKE_PODS,
+        "ports": FAKE_PORTS,
+        "accounts": [],
     }
     return client
 
@@ -358,6 +383,8 @@ class TestConfirmTransfer:
             source_id="pod-2",
             destination_id="pod-1",
             amount_cents=5000,
+            source_type="POD",
+            destination_type="POD",
             description="",
         )
         # Pending transfer should be cleaned up
@@ -394,6 +421,8 @@ class TestConfirmTransfer:
             source_id="pod-2",
             destination_id="pod-1",
             amount_cents=5000,
+            source_type="POD",
+            destination_type="POD",
             description="Monthly grocery restock",
         )
 
@@ -1158,9 +1187,13 @@ class TestFuzzyPodBalance:
 
 
 class TestTransferSingleApiCall:
-    def test_calls_get_pods_once(self, agent_config, pending):
+    def test_calls_get_all_accounts_once(self, agent_config, pending):
         client = MagicMock()
-        client.get_pods.return_value = FAKE_PODS
+        client.get_all_accounts.return_value = {
+            "pods": FAKE_PODS,
+            "ports": [],
+            "accounts": [],
+        }
         execute_tool(
             "request_transfer",
             {
@@ -1172,12 +1205,16 @@ class TestTransferSingleApiCall:
             agent_config,
             pending,
         )
-        client.get_pods.assert_called_once()
-        client.get_pod_balance.assert_not_called()
+        client.get_all_accounts.assert_called_once()
+        client.get_pods.assert_not_called()
 
     def test_transfer_fuzzy_resolves(self, agent_config, pending):
         client = MagicMock()
-        client.get_pods.return_value = POSSESSIVE_PODS
+        client.get_all_accounts.return_value = {
+            "pods": POSSESSIVE_PODS,
+            "ports": [],
+            "accounts": [],
+        }
         result = json.loads(
             execute_tool(
                 "request_transfer",
@@ -1193,6 +1230,150 @@ class TestTransferSingleApiCall:
         )
         assert result["source"] == "Alice's Groceries"
         assert result["destination"] == "Bob's Savings"
+
+
+# -- Port transfer tests ----------------------------------------------------
+
+
+class TestPortTransfers:
+    def test_port_to_pod_transfer(self, mock_client, agent_config, pending, sdk_config):
+        result = json.loads(
+            execute_tool(
+                "request_transfer",
+                {
+                    "source_name": "Payroll",
+                    "destination_name": "Groceries",
+                    "amount_dollars": 100.00,
+                },
+                mock_client,
+                agent_config,
+                pending,
+                sdk_config=sdk_config,
+            )
+        )
+        assert "pending_transfer_id" in result
+        assert result["source"] == "Payroll"
+        assert result["destination"] == "Groceries"
+        stored = pending[result["pending_transfer_id"]]
+        assert stored["source_type"] == "PORT"
+        assert stored["destination_type"] == "POD"
+
+    def test_pod_to_port_transfer(self, mock_client, agent_config, pending, sdk_config):
+        result = json.loads(
+            execute_tool(
+                "request_transfer",
+                {
+                    "source_name": "Rent",
+                    "destination_name": "Side Hustle",
+                    "amount_dollars": 50.00,
+                },
+                mock_client,
+                agent_config,
+                pending,
+                sdk_config=sdk_config,
+            )
+        )
+        assert "pending_transfer_id" in result
+        assert result["source"] == "Rent"
+        assert result["destination"] == "Side Hustle"
+        stored = pending[result["pending_transfer_id"]]
+        assert stored["source_type"] == "POD"
+        assert stored["destination_type"] == "PORT"
+
+    def test_unknown_port_name_error(
+        self, mock_client, agent_config, pending, sdk_config
+    ):
+        result = json.loads(
+            execute_tool(
+                "request_transfer",
+                {
+                    "source_name": "Nonexistent Port",
+                    "destination_name": "Groceries",
+                    "amount_dollars": 10.00,
+                },
+                mock_client,
+                agent_config,
+                pending,
+                sdk_config=sdk_config,
+            )
+        )
+        assert "error" in result
+        assert "not found" in result["error"]
+
+    def test_confirm_transfer_passes_correct_types(
+        self, mock_client, agent_config, pending, sdk_config
+    ):
+        pending["txn-port"] = {
+            "source_id": "port-1",
+            "source_name": "Payroll",
+            "source_type": "PORT",
+            "destination_id": "pod-1",
+            "destination_name": "Groceries",
+            "destination_type": "POD",
+            "amount_cents": 10000,
+            "amount_display": "$100.00",
+            "created_at": time.time(),
+        }
+        mock_client.transfer.return_value = {
+            "organization": {"id": "org-1", "pods": []}
+        }
+
+        result = json.loads(
+            _handle_confirm_transfer(
+                {"pending_transfer_id": "txn-port"},
+                mock_client,
+                agent_config,
+                pending,
+                sdk_config=sdk_config,
+            )
+        )
+
+        assert result["success"] is True
+        mock_client.transfer.assert_called_once_with(
+            "kyc-1",
+            source_id="port-1",
+            destination_id="pod-1",
+            amount_cents=10000,
+            source_type="PORT",
+            destination_type="POD",
+            description="",
+        )
+
+
+class TestFindAccountByName:
+    def test_exact_pod_match(self):
+        result = _find_account_by_name("Groceries", FAKE_PODS, FAKE_PORTS)
+        assert result is not None
+        assert result["name"] == "Groceries"
+        assert result["type"] == "POD"
+
+    def test_exact_port_match(self):
+        result = _find_account_by_name("Payroll", FAKE_PODS, FAKE_PORTS)
+        assert result is not None
+        assert result["name"] == "Payroll"
+        assert result["type"] == "PORT"
+
+    def test_substring_pod_match(self):
+        result = _find_account_by_name("grocer", FAKE_PODS, FAKE_PORTS)
+        assert result is not None
+        assert result["name"] == "Groceries"
+        assert result["type"] == "POD"
+
+    def test_substring_port_match(self):
+        result = _find_account_by_name("payro", FAKE_PODS, FAKE_PORTS)
+        assert result is not None
+        assert result["name"] == "Payroll"
+        assert result["type"] == "PORT"
+
+    def test_not_found(self):
+        result = _find_account_by_name("Nonexistent", FAKE_PODS, FAKE_PORTS)
+        assert result is None
+
+    def test_case_insensitive(self):
+        result = _find_account_by_name("payroll", FAKE_PODS, FAKE_PORTS)
+        assert result is not None
+        assert result["name"] == "Payroll"
+        assert result["type"] == "PORT"
 
 
 # -- Typing indicator tests -------------------------------------------------

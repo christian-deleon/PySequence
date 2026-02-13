@@ -81,7 +81,7 @@ TOOLS = [
     {
         "name": "request_transfer",
         "description": (
-            "Stage a transfer between two pods. This does NOT execute the transfer — "
+            "Stage a transfer between two pods or ports. This does NOT execute the transfer — "
             "it validates the request and returns a confirmation payload. "
             "The user must explicitly confirm before the transfer executes. "
             "You MUST always include a note. Infer a short, clear description from "
@@ -94,11 +94,11 @@ TOOLS = [
             "properties": {
                 "source_name": {
                     "type": "string",
-                    "description": "Name of the source pod (case-insensitive).",
+                    "description": "Name of the source pod or port (case-insensitive).",
                 },
                 "destination_name": {
                     "type": "string",
-                    "description": "Name of the destination pod (case-insensitive).",
+                    "description": "Name of the destination pod or port (case-insensitive).",
                 },
                 "amount_dollars": {
                     "type": "number",
@@ -287,6 +287,75 @@ def _suggest_pods(name: str, pods: list[dict[str, Any]]) -> str:
     return " Try using get_all_pods to see available pods."
 
 
+def _find_port(name: str, ports: list[dict[str, Any]]) -> dict[str, Any] | None:
+    """Find a port by exact match, then single-substring match."""
+    name_lower = name.lower()
+    for port in ports:
+        if port["name"].lower() == name_lower:
+            return port
+    substring_matches = [p for p in ports if name_lower in p["name"].lower()]
+    if len(substring_matches) == 1:
+        return substring_matches[0]
+    return None
+
+
+def _suggest_ports(name: str, ports: list[dict[str, Any]]) -> str:
+    """Return a suggestion suffix for unmatched port names."""
+    name_lower = name.lower()
+    substring_matches = [p for p in ports if name_lower in p["name"].lower()]
+    if substring_matches:
+        names = ", ".join(p["name"] for p in substring_matches)
+        return f" Did you mean: {names}?"
+    return " Try using get_all_accounts to see available ports."
+
+
+def _find_account_by_name(
+    name: str, pods: list[dict[str, Any]], ports: list[dict[str, Any]]
+) -> dict[str, Any] | None:
+    """Search across pods and ports by name.
+
+    Return dict with id, name, type, balance_cents, balance.
+    Exact match first, then single-substring. Returns None if ambiguous or not found.
+    """
+    name_lower = name.lower()
+
+    # Exact match across both
+    for pod in pods:
+        if pod["name"].lower() == name_lower:
+            return {
+                "id": pod["id"],
+                "name": pod["name"],
+                "type": "POD",
+                "balance_cents": pod["balance_cents"],
+                "balance": pod["balance"],
+            }
+    for port in ports:
+        if port["name"].lower() == name_lower:
+            return {
+                "id": port["id"],
+                "name": port["name"],
+                "type": "PORT",
+                "balance_cents": port["balance_cents"],
+                "balance": port["balance"],
+            }
+
+    # Substring match across both
+    all_items = [(p, "POD") for p in pods] + [(p, "PORT") for p in ports]
+    substring_matches = [
+        (item, typ) for item, typ in all_items if name_lower in item["name"].lower()
+    ]
+    if len(substring_matches) == 1:
+        item, typ = substring_matches[0]
+        return {
+            "id": item["id"],
+            "name": item["name"],
+            "type": typ,
+            "balance_cents": item["balance_cents"],
+            "balance": item["balance"],
+        }
+    return None
+
+
 def execute_tool(
     tool_name: str,
     tool_input: dict[str, Any],
@@ -341,6 +410,7 @@ def execute_tool(
             client,
             agent_config,
             pending_transfers,
+            sdk_config=sdk_config,
             user_id=user_id,
             staged_this_turn=staged_this_turn,
             daily_limits=daily_limits,
@@ -383,6 +453,7 @@ def _handle_request_transfer(
     agent_config: AgentConfig,
     pending_transfers: dict[str, dict],
     *,
+    sdk_config: SdkConfig | None = None,
     user_id: int | None = None,
     staged_this_turn: list[str] | None = None,
     daily_limits: DailyLimitTracker | None = None,
@@ -433,21 +504,22 @@ def _handle_request_transfer(
                 }
             )
 
-    # Resolve both pods with a single API call
-    pods = client.get_pods()
+    # Resolve source and destination across pods and ports
+    org_id = sdk_config.org_id if sdk_config else None
+    all_accounts = client.get_all_accounts(org_id)
+    pods = all_accounts["pods"]
+    ports = all_accounts["ports"]
 
-    source = _find_pod(source_name, pods)
+    source = _find_account_by_name(source_name, pods, ports)
     if source is None:
         suggestion = _suggest_pods(source_name, pods)
-        return json.dumps(
-            {"error": f"Source pod '{source_name}' not found.{suggestion}"}
-        )
+        return json.dumps({"error": f"Source '{source_name}' not found.{suggestion}"})
 
-    destination = _find_pod(destination_name, pods)
+    destination = _find_account_by_name(destination_name, pods, ports)
     if destination is None:
         suggestion = _suggest_pods(destination_name, pods)
         return json.dumps(
-            {"error": f"Destination pod '{destination_name}' not found.{suggestion}"}
+            {"error": f"Destination '{destination_name}' not found.{suggestion}"}
         )
 
     # Check sufficient balance
@@ -466,8 +538,10 @@ def _handle_request_transfer(
     pending = {
         "source_id": source["id"],
         "source_name": source["name"],
+        "source_type": source["type"],
         "destination_id": destination["id"],
         "destination_name": destination["name"],
+        "destination_type": destination["type"],
         "amount_cents": amount_cents,
         "amount_display": f"${amount_dollars:.2f}",
         "created_at": time.time(),
@@ -545,6 +619,8 @@ def _handle_confirm_transfer(
             source_id=transfer["source_id"],
             destination_id=transfer["destination_id"],
             amount_cents=transfer["amount_cents"],
+            source_type=transfer.get("source_type", "POD"),
+            destination_type=transfer.get("destination_type", "POD"),
             description=transfer.get("note", ""),
         )
     except RuntimeError as e:
